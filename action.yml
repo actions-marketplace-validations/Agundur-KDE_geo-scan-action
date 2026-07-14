@@ -1,0 +1,71 @@
+name: 'Agundur GEO Scan'
+description: 'Check a live URL for AI-search / LLM-citability readiness (llms.txt, structured data, answer directness, E-E-A-T signals) and get a 0-100 score plus a per-check breakdown.'
+author: 'Agundur-KDE'
+
+branding:
+  icon: 'search'
+  color: 'blue'
+
+inputs:
+  url:
+    description: 'The URL to scan'
+    required: true
+  lang:
+    description: 'Report language: de or en'
+    required: false
+    default: 'en'
+  fail-under:
+    description: 'Fail the build if the score is below this threshold (0-100). Leave empty to never fail.'
+    required: false
+    default: ''
+
+outputs:
+  score:
+    description: 'GEO score (0-100)'
+    value: ${{ steps.scan.outputs.score }}
+  report:
+    description: 'Full JSON report (score + per-check breakdown)'
+    value: ${{ steps.scan.outputs.report }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Run GEO scan'
+      id: scan
+      shell: bash
+      run: |
+        set -euo pipefail
+        RESPONSE=$(curl -sS -G "https://www.agundur.de/geo-scan-api.php" \
+          --data-urlencode "url=${{ inputs.url }}" \
+          --data-urlencode "lang=${{ inputs.lang }}" \
+          -w $'\n%{http_code}')
+        HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+        BODY=$(echo "$RESPONSE" | sed '$d')
+
+        if [ "$HTTP_CODE" != "200" ]; then
+          ERROR=$(echo "$BODY" | jq -r '.error // "Unknown error"')
+          echo "::error::GEO scan failed (HTTP $HTTP_CODE): $ERROR"
+          exit 1
+        fi
+
+        SCORE=$(echo "$BODY" | jq -r '.score')
+        echo "score=$SCORE" >> "$GITHUB_OUTPUT"
+        {
+          echo "report<<GEOSCANEOF"
+          echo "$BODY"
+          echo "GEOSCANEOF"
+        } >> "$GITHUB_OUTPUT"
+
+        {
+          echo "## GEO Scan Result"
+          echo ""
+          echo "**Score: ${SCORE}/100** for \`${{ inputs.url }}\`"
+          echo ""
+          echo "[Full report at agundur.de](https://www.agundur.de/geo-scanner.html?url=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "${{ inputs.url }}"))"
+        } >> "$GITHUB_STEP_SUMMARY"
+
+        FAIL_UNDER="${{ inputs.fail-under }}"
+        if [ -n "$FAIL_UNDER" ] && [ "$SCORE" -lt "$FAIL_UNDER" ]; then
+          echo "::error::GEO score ${SCORE} is below the required threshold of ${FAIL_UNDER}"
+          exit 1
+        fi
