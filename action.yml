@@ -1,5 +1,5 @@
 name: 'Agundur GEO Scan'
-description: 'Check a live URL for AI-search / LLM-citability readiness (llms.txt, structured data, answer directness, E-E-A-T signals) and get a 0-100 score plus a per-check breakdown.'
+description: 'Check a URL for AI-search/LLM-citability readiness — 0-100 score plus a per-check breakdown.'
 author: 'Agundur-KDE'
 
 branding:
