@@ -1,5 +1,7 @@
 # Agundur GEO Scan
 
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Agundur%20GEO%20Scan-blue?logo=github)](https://github.com/marketplace/actions/agundur-geo-scan)
+
 > Check whether a live URL is ready to be cited by AI search engines and LLMs (ChatGPT, Copilot, Perplexity, Google AI Overviews) — right from your GitHub Actions pipeline.
 
 This action calls the free **GEO Scanner** API from [agundur.de](https://www.agundur.de/geo-scanner.html) and checks a URL for `llms.txt`, structured data, answer directness, E-E-A-T signals and more. It returns a 0-100 score plus a per-check breakdown, without leaving your CI run.
