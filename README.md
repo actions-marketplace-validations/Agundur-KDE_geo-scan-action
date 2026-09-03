@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="assets/logo.png" width="320" alt="Agundur GEO Scan logo">
+</div>
+
 # Agundur GEO Scan
 
 [![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Agundur%20GEO%20Scan-blue?logo=github)](https://github.com/marketplace/actions/agundur-geo-scan)
